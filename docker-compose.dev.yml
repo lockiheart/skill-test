@@ -1,0 +1,84 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: school_mgmt_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: school_mgmt
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data_dev:/var/lib/postgresql/data
+      - ./seed_db:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d school_mgmt"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+# During the first run need to execute the following to install dev packages: 
+# `docker-compose -f docker-compose.dev.yml run -ti backend npm i`
+# I've added guid to the end of secrets so even if somebody uses these by an accident, they still will be unique and not guessable.
+# In production though, we should use proper secrets
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    container_name: school_mgmt_backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PORT: 5007
+      NODE_ENV: development
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/school_mgmt
+      JWT_ACCESS_TOKEN_SECRET: super_secret_access_token_28be581e-6e6d-4140-8db8-00e544de83a7
+      JWT_REFRESH_TOKEN_SECRET: super_secret_refresh_token_34e1cd10-0d10-414f-ba26-4b5ccf83e4dd
+      JWT_ACCESS_TOKEN_TIME_IN_MS: 900000
+      JWT_REFRESH_TOKEN_TIME_IN_MS: 28800000
+      CSRF_TOKEN_SECRET: super_secret_csrf_token_86d9c828-2d2c-4c9a-9c12-823355b598fa
+      CSRF_TOKEN_TIME_IN_MS: 950000
+      MAIL_FROM_USER: noreply@school.local
+      EMAIL_VERIFICATION_TOKEN_SECRET: super_secret_email_verification_6d92b15b-d2a2-4132-8f0b-eb651e6e25fc
+      EMAIL_VERIFICATION_TOKEN_TIME_IN_MS: 18000000
+      PASSWORD_SETUP_TOKEN_SECRET: super_secret_password_setup_cd623c67-be19-4f2f-8fff-2fc4140e48f6
+      PASSWORD_SETUP_TOKEN_TIME_IN_MS: 300000
+      UI_URL: http://localhost:5173
+      API_URL: http://localhost:5007
+      COOKIE_DOMAIN: localhost
+      RESEND_API_KEY: dummy_key
+    ports:
+      - "5007:5007"
+    volumes:
+      - ./backend:/app
+      - ./backend/node_modules:/app/node_modules
+    command: npm run dev
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: school_mgmt_frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    environment:
+      VITE_API_URL: http://localhost:5007
+      VITE_APP_NAME: Student Management System
+      VITE_APP_VERSION: 1.0.0
+      NODE_ENV: development
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - ./frontend/node_modules:/app/node_modules
+    stdin_open: true
+    tty: true
+    command: npm run dev -- --host 0.0.0.0 --port 5173
+
+volumes:
+  postgres_data_dev:
