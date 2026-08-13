@@ -7,8 +7,13 @@ const getRoleId = async (roleName) => {
     return rows[0].id;
 }
 
+// Added ILIKE into name search and added simple pagination
 const findAllStudents = async (payload) => {
-    const { name, className, section, roll } = payload;
+    const { name, className, section, roll, page = 1, limit = 10 } = payload;
+    const safePage = Number(page) > 0 ? Number(page) : 1;
+    const safeLimit = Number(limit) > 0 ? Number(limit) : 10;
+    const offset = (safePage - 1) * safeLimit;
+
     let query = `
         SELECT
             t1.id,
@@ -20,9 +25,10 @@ const findAllStudents = async (payload) => {
         LEFT JOIN user_profiles t3 ON t1.id = t3.user_id
         WHERE t1.role_id = 3`;
     let queryParams = [];
+
     if (name) {
-        query += ` AND t1.name = $${queryParams.length + 1}`;
-        queryParams.push(name);
+        query += ` AND t1.name ILIKE $${queryParams.length + 1}`;
+        queryParams.push(`%${name}%`);
     }
     if (className) {
         query += ` AND t3.class_name = $${queryParams.length + 1}`;
@@ -37,7 +43,8 @@ const findAllStudents = async (payload) => {
         queryParams.push(roll);
     }
 
-    query += ' ORDER BY t1.id';
+    query += ` ORDER BY t1.id LIMIT $${queryParams.length + 1} OFFSET $${queryParams.length + 2}`;
+    queryParams.push(safeLimit, offset);
 
     const { rows } = await processDBRequest({ query, queryParams });
     return rows;
