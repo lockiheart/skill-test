@@ -1,14 +1,6 @@
 const asyncHandler = require("express-async-handler");
 const { getAllStudents, addNewStudent, getStudentDetail, setStudentStatus, updateStudent } = require("./students-service");
-const z = require("zod");
-
-const getAllStudentsSchema = z.object({
-    page: z.number().optional(),
-    limit: z.number().optional(),
-    search: z.string().stringFormat(/([A-Za-z0-9 ])+/).optional(), // Limit to safe SQL characters and spaces
-    class: z.string().stringFormat(/([A-Za-z0-9 ])+/).optional(),
-    section: z.string().stringFormat(/([A-Za-z0-9 ])+/).optional(),
-});
+const { getAllStudentsSchema, addStudentSchema } = require("./student-schemas");
 
 // roll param exists in repository but not in the query params from task, so I am not adding it here. 
 const handleGetAllStudents = asyncHandler(async (req, res) => {
@@ -32,8 +24,9 @@ const handleGetAllStudents = asyncHandler(async (req, res) => {
 });
 
 const handleAddStudent = asyncHandler(async (req, res) => {
-    //write your code
-
+    const payload = addStudentSchema.parse(req.body);
+    const message = await addNewStudent(payload);
+    res.json(message);
 });
 
 const handleUpdateStudent = asyncHandler(async (req, res) => {
