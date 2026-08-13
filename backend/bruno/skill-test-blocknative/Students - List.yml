@@ -6,9 +6,6 @@ info:
 http:
   method: GET
   url: localhost:5007/api/v1/students
-  headers:
-    - name: x-csrf-token
-      value: 24ccfab3-a6e4-4c60-a050-75a821f47585
   auth: inherit
 
 settings:

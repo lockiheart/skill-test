@@ -5,10 +5,7 @@ info:
 
 http:
   method: GET
-  url: localhost:5007/api/v1/students?search=Joh&page=2&limit=
-  headers:
-    - name: x-csrf-token
-      value: 24ccfab3-a6e4-4c60-a050-75a821f47585
+  url: localhost:5007/api/v1/students?search=Joh&page=2&limit=2
   params:
     - name: search
       value: Joh
@@ -17,7 +14,7 @@ http:
       value: "2"
       type: query
     - name: limit
-      value: ""
+      value: "2"
       type: query
   auth: inherit
 
