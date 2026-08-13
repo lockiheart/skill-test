@@ -5,11 +5,7 @@ info:
 
 http:
   method: DELETE
-  url: localhost:5007/api/v1/students/2
-  headers:
-    - name: x-csrf-token
-      value: 00dd41fa-7e92-4b10-9aa7-25d13c827b71
-      disabled: true
+  url: localhost:5007/api/v1/students/3
   auth: inherit
 
 settings:

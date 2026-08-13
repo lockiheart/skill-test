@@ -5,13 +5,13 @@ info:
 
 http:
   method: GET
-  url: localhost:5007/api/v1/students?search=Joh&page=2&limit=2
+  url: localhost:5007/api/v1/students?search=Joh&page=1&limit=2
   params:
     - name: search
       value: Joh
       type: query
     - name: page
-      value: "2"
+      value: "1"
       type: query
     - name: limit
       value: "2"

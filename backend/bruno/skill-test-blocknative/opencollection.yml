@@ -17,7 +17,7 @@ config:
 request:
   headers:
     - name: x-csrf-token
-      value: 67f10cf6-cf6f-433b-bf2d-684947788c91
+      value: 528cee58-7772-4407-90c0-c1f6b3f536c0
 bundled: false
 extensions:
   bruno:

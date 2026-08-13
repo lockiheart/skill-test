@@ -14,8 +14,8 @@ http:
     type: json
     data: |-
       {
-        "name": "John Doe",
-        "email": "john_doe@example.com",
+        "name": "John Doe2",
+        "email": "john_doe2@example.com",
         "class_name": "Grade 10",
         "section_name": "A",
         "roll": 101,

@@ -4,25 +4,10 @@ const { getAllStudentsSchema, addStudentSchema, userIdSchema, studentStatusSchem
 
 // roll param exists in repository but not in the query params from task, so I am not adding it here. 
 const handleGetAllStudents = asyncHandler(async (req, res) => {
+    let parsed;
     try {
-        const {
-            page = 1,
-            limit = 10,
-            search,
-            class: className,
-            section,
-        } = await getAllStudentsSchema.parseAsync(req.query);
-        console.log('req.query', req.query, 'parsed', { page, limit, search, className, section });
+        parsed = await getAllStudentsSchema.parseAsync(req.query);
 
-        const students = await getAllStudents({
-            page,
-            limit,
-            name: search,
-            className,
-            section,
-        });
-
-        res.json({ students });
     } catch (error) {
         console.error('Error in handleGetAllStudents:', error);
         if (error.name === 'ZodError') {
@@ -31,13 +16,28 @@ const handleGetAllStudents = asyncHandler(async (req, res) => {
             res.status(500).json({ error: 'Internal Server Error' });
         }
     }
+
+    const {
+            page = 1,
+            limit = 10,
+            search,
+            class: className,
+            section,
+        } = parsed;
+    const students = await getAllStudents({
+        page,
+        limit,
+        name: search,
+        className,
+        section,
+    });
+    res.json({ students });
 });
 
 const handleAddStudent = asyncHandler(async (req, res) => {
+    let payload;
     try {
-        const payload = addStudentSchema.parse(req.body);
-        const message = await addNewStudent(payload);
-        res.json(message);
+        payload = addStudentSchema.parse(req.body);
     } catch (error) {
         console.error('Error in handleAddStudent:', error);
         if (error.name === 'ZodError') {
@@ -46,21 +46,17 @@ const handleAddStudent = asyncHandler(async (req, res) => {
             res.status(500).json({ error: 'Internal Server Error' });
         }
     }
+
+    const message = await addNewStudent(payload);
+    res.json(message);
 });
 
 const handleUpdateStudent = asyncHandler(async (req, res) => {
-try {
-        const userId = userIdSchema.parse(req.params.id);
-        const payload = addStudentSchema.parse(req.body);
-        // updateStudent function expects whole information about student
-        const studentDetail = await getStudentDetail(userId);
-        if (!studentDetail) {
-            return res.status(404).json({ error: "Student not found" });
-        }
-
-        const updatedPayload = { ...studentDetail, ...payload, userId };
-        const message = await updateStudent(updatedPayload);
-        res.json(message);
+    let userId;
+    let payload;
+    try {
+        userId = userIdSchema.parse(req.params.id);
+        payload = addStudentSchema.parse(req.body);
     } catch (error) {
         console.error('Error in handleUpdateStudent:', error);
         if (error.name === 'ZodError') {
@@ -69,13 +65,22 @@ try {
             res.status(500).json({ error: 'Internal Server Error' });
         }
     }
+
+    // updateStudent function expects whole information about student
+    const studentDetail = await getStudentDetail(userId);
+    if (!studentDetail) {
+        return res.status(404).json({ error: "Student not found" });
+    }
+
+    const updatedPayload = { ...studentDetail, ...payload, userId };
+    const message = await updateStudent(updatedPayload);
+    res.json(message);
 });
 
 const handleGetStudentDetail = asyncHandler(async (req, res) => {
+    let userId;
     try {
-        const userId = userIdSchema.parse(req.params.id);
-        const student = await getStudentDetail(userId);
-        res.json(student);
+        userId = userIdSchema.parse(req.params.id);
     } catch (error) {
         console.error('Error in handleGetStudentDetail:', error);
         if (error.name === 'ZodError') {
@@ -84,15 +89,17 @@ const handleGetStudentDetail = asyncHandler(async (req, res) => {
             res.status(500).json({ error: 'Internal Server Error' });
         }
     }
+
+    const student = await getStudentDetail(userId);
+    res.json(student);
 });
 
 const handleStudentStatus = asyncHandler(async (req, res) => {
+    let userId;
+    let status;
     try {
-        const userId = userIdSchema.parse(req.params.id);
-        const { status } = studentStatusSchema.parse(req.body);
-        const { id: reviewerId } = req.user;
-        const message = await setStudentStatus({ userId, reviewerId, status });
-        res.json(message);
+        userId = userIdSchema.parse(req.params.id);
+        ({ status } = studentStatusSchema.parse(req.body));
     } catch (error) {
         console.error('Error in handleStudentStatus:', error);
         if (error.name === 'ZodError') {
@@ -101,13 +108,15 @@ const handleStudentStatus = asyncHandler(async (req, res) => {
             res.status(500).json({ error: 'Internal Server Error' });
         }
     }
+    const { id: reviewerId } = req.user;
+    const message = await setStudentStatus({ userId, reviewerId, status });
+    res.json(message);
 });
 
 const handleDeleteStudent = asyncHandler(async (req, res) => {
+    let userId;
     try {
-        const userId = userIdSchema.parse(req.params.id);
-        const message = await deleteStudent(userId);
-        res.json(message);
+        userId = userIdSchema.parse(req.params.id);
     } catch (error) {
         console.error('Error in handleDeleteStudent:', error);
         if (error.name === 'ZodError') {
@@ -116,6 +125,9 @@ const handleDeleteStudent = asyncHandler(async (req, res) => {
             res.status(500).json({ error: 'Internal Server Error' });
         }
     }
+
+    const message = await deleteStudent(userId);
+    res.json(message);
 })
 
 module.exports = {
