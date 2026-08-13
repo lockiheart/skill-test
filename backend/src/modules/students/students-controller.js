@@ -1,5 +1,5 @@
 const asyncHandler = require("express-async-handler");
-const { getAllStudents, addNewStudent, getStudentDetail, setStudentStatus, updateStudent } = require("./students-service");
+const { getAllStudents, addNewStudent, getStudentDetail, setStudentStatus, updateStudent, deleteStudent } = require("./students-service");
 const { getAllStudentsSchema, addStudentSchema, userIdSchema, studentStatusSchema } = require("./student-schemas");
 
 // roll param exists in repository but not in the query params from task, so I am not adding it here. 
@@ -103,10 +103,26 @@ const handleStudentStatus = asyncHandler(async (req, res) => {
     }
 });
 
+const handleDeleteStudent = asyncHandler(async (req, res) => {
+    try {
+        const userId = userIdSchema.parse(req.params.id);
+        const message = await deleteStudent(userId);
+        res.json(message);
+    } catch (error) {
+        console.error('Error in handleDeleteStudent:', error);
+        if (error.name === 'ZodError') {
+            res.status(400).json({ error: "Validation error", details: error.errors });
+        } else {
+            res.status(500).json({ error: 'Internal Server Error' });
+        }
+    }
+})
+
 module.exports = {
     handleGetAllStudents,
     handleGetStudentDetail,
     handleAddStudent,
     handleStudentStatus,
     handleUpdateStudent,
+    handleDeleteStudent
 };

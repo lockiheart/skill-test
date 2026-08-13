@@ -9,18 +9,19 @@ http:
   headers:
     - name: x-csrf-token
       value: 24ccfab3-a6e4-4c60-a050-75a821f47585
+      disabled: true
   body:
     type: json
     data: |-
       {
         "name": "John Doe",
-        "email": "john@example.com",
+        "email": "john_doe@example.com",
         "class_name": "Grade 10",
         "section_name": "A",
         "roll": 101,
-        "dob": "2005-01-15",
+        "dob": "2005-01-16",
         "father_name": "Robert Doe",
-        "father_phone": "+1234567890"
+        "father_phone": "+1234567891"
       }
   auth: inherit
 

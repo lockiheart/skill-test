@@ -2,6 +2,22 @@ opencollection: 1.0.0
 
 info:
   name: skill-test-blocknative
+config:
+  proxy:
+    inherit: true
+    config:
+      protocol: http
+      hostname: ""
+      port: ""
+      auth:
+        username: ""
+        password: ""
+      bypassProxy: ""
+
+request:
+  headers:
+    - name: x-csrf-token
+      value: 67f10cf6-cf6f-433b-bf2d-684947788c91
 bundled: false
 extensions:
   bruno:

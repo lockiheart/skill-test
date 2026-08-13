@@ -6,6 +6,9 @@ info:
 http:
   method: POST
   url: localhost:5007/api/v1/auth/login
+  headers:
+    - name: x-csrf-token
+      value: ""
   body:
     type: json
     data: |-

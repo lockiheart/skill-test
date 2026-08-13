@@ -1,5 +1,5 @@
 const { ApiError, sendAccountVerificationEmail } = require("../../utils");
-const { findAllStudents, findStudentDetail, findStudentToSetStatus, addOrUpdateStudent } = require("./students-repository");
+const { findAllStudents, findStudentDetail, findStudentToSetStatus, addOrUpdateStudent, deleteStudentByUserId } = require("./students-repository");
 const { findUserById } = require("../../shared/repository");
 
 const checkStudentId = async (id) => {
@@ -37,7 +37,6 @@ const addNewStudent = async (payload) => {
         if (!result.status) {
             throw new ApiError(500, result.message);
         }
-
         try {
             await sendAccountVerificationEmail({ userId: result.userId, userEmail: payload.email });
             return { message: ADD_STUDENT_AND_EMAIL_SEND_SUCCESS };
@@ -69,10 +68,27 @@ const setStudentStatus = async ({ userId, reviewerId, status }) => {
     return { message: "Student status changed successfully" };
 }
 
+const deleteStudent = async (id) => {
+    // NOTE: I don't know the meaning of isActive in the context of this application, 
+    //       but I assume that setting isActive to false might mean deleting the student.
+    //       So it might look like this:
+    
+    // const result = await addOrUpdateStudent({ userId: id, isActive: false });
+    // if (!result.status) {
+    //     throw new ApiError(500, result.message);
+    // }
+
+    // But I'm going to just delete the student from the database for now, since the requirement is to delete the student.
+    const result = await deleteStudentByUserId(id);
+
+    return { message: result.message };
+}
+
 module.exports = {
     getAllStudents,
     getStudentDetail,
     addNewStudent,
     setStudentStatus,
     updateStudent,
+    deleteStudent,
 };

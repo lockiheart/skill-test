@@ -425,6 +425,33 @@ EXCEPTION
 END;
 $BODY$;
 
+--student delete
+DROP FUNCTION IF EXISTS student_delete(INTEGER);
+CREATE OR REPLACE FUNCTION public.student_delete(_userId INTEGER)
+RETURNS TABLE("userId" INTEGER, status BOOLEAN, message TEXT)
+LANGUAGE 'plpgsql'
+AS $BODY$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM users WHERE id = _userId) THEN
+        RETURN QUERY
+            SELECT _userId, false, 'Student not found';
+        RETURN;
+    END IF;
+
+    DELETE FROM user_profiles
+    WHERE user_id = _userId;
+
+    DELETE FROM users
+    WHERE id = _userId;
+
+    RETURN QUERY
+        SELECT _userId, true, 'Student deleted successfully';
+EXCEPTION
+    WHEN OTHERS THEN
+        RETURN QUERY
+            SELECT _userId, false, 'Unable to delete student';
+END;
+$BODY$;
 
 DROP FUNCTION IF EXISTS public.get_dashboard_data(INTEGER);
 CREATE OR REPLACE FUNCTION get_dashboard_data(_user_id INTEGER)
