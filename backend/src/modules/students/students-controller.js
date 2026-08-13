@@ -4,23 +4,33 @@ const { getAllStudentsSchema, addStudentSchema, userIdSchema, studentStatusSchem
 
 // roll param exists in repository but not in the query params from task, so I am not adding it here. 
 const handleGetAllStudents = asyncHandler(async (req, res) => {
-    const {
-        page = 1,
-        limit = 10,
-        search,
-        class: className,
-        section,
-    } = await getAllStudentsSchema.parseAsync(req.query);
+    try {
+        const {
+            page = 1,
+            limit = 10,
+            search,
+            class: className,
+            section,
+        } = await getAllStudentsSchema.parseAsync(req.query);
+        console.log('req.query', req.query, 'parsed', { page, limit, search, className, section });
 
-    const students = await getAllStudents({
-        page,
-        limit,
-        search,
-        className,
-        section,
-    });
+        const students = await getAllStudents({
+            page,
+            limit,
+            name: search,
+            className,
+            section,
+        });
 
-    res.json({ students });
+        res.json({ students });
+    } catch (error) {
+        console.error('Error in handleGetAllStudents:', error);
+        if (error.name === 'ZodError') {
+            res.status(400).json({ error: "Validation error", details: error.errors });
+        } else {
+            res.status(500).json({ error: 'Internal Server Error' });
+        }
+    }
 });
 
 const handleAddStudent = asyncHandler(async (req, res) => {
